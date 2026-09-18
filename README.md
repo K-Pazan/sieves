@@ -1,8 +1,5 @@
 ## Files
 
-- [View RMarkdown file] https://K-Pazan.github.io/sieves/Sleves-markdown.html
-- [Download RMarkdown file] https://K-Pazan.github.io/sieves/SIeves markdown.Rmd
-
 
 ## Required packages
 
