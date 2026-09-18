@@ -1,0 +1,108 @@
+---
+title: "Umhlatuzana Sieve Analysis"
+author: "Kyra Pazan"
+date: "2026-09-10"
+output: pdf_document
+  pdf_document: default
+  html_document: default
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(Kendall)
+library(ggplot2)
+library(ggpubr)
+library(rmarkdown)
+LSA_spits <- readRDS("LSAspits.rds")
+MSA_spits <- readRDS("MSAspits.rds")
+UMH_sieves <- readRDS("UMHsieves.rds")
+UMH_allfinds <- readRDS("UMH_allfinds.rds")
+gerrit <- readRDS("gerritpalette.rds")
+```
+
+## Test for Proportions
+
+We conducted a two-sample test for equality of proportions using the built-in *stats* package [@base], comparing the relative proportion of the technological sample before and after the MSA/LSA transition. Spits assigned to the transition were not included in this analysis.
+
+```{r Data preparation}
+
+MSA_all <- c(sum(MSA_spits$All.big)+sum(MSA_spits$All.small))
+LSA_all <- c(sum(LSA_spits$All.big)+sum(LSA_spits$All.small))
+MSA_big <- sum(MSA_spits$All.big)
+LSA_big <- sum(LSA_spits$All.big)
+big <- c(MSA_big, LSA_big)
+allartifacts <- c(MSA_all, LSA_all)
+prop.test(big, n=allartifacts)
+```
+
+## Kendall's rank correlation tests
+
+We used Kendall's rank correlation tests in the package *Kendall* [@Kendall] to assess correlations between the numbers of small and large finds across various raw materials and different time periods. Below are the results across the entire sequence, first for all materials, then separating quartz and nonquartz.
+
+```{r data preparation}
+Kendall(UMH_sieves$All.big, UMH_sieves$All.small)
+Kendall(UMH_sieves$Quartz.big, UMH_sieves$Quartz.small)
+Kendall(UMH_sieves$Nonquartz.big, UMH_sieves$Nonquartz.small)
+```
+
+We then separated the final and late MSA spits (46-61) from the LSA spits (15-43), and performed the same set of correlations.
+
+```{r}
+range(LSA_spits$Spit)
+Kendall(LSA_spits$All.big,LSA_spits$All.small)
+Kendall(LSA_spits$Quartz.big,LSA_spits$Quartz.small)
+Kendall(LSA_spits$Nonquartz.big, LSA_spits$Nonquartz.small)
+range(MSA_spits$Spit)
+Kendall(MSA_spits$All.big,MSA_spits$All.small)
+Kendall(MSA_spits$Quartz.big,MSA_spits$Quartz.small)
+Kendall(MSA_spits$Nonquartz.big,MSA_spits$Nonquartz.small)
+```
+
+## Plot
+
+Figure 1 is reproduced below, along with the associated code. The packages *ggplot2* [@ggplot2] and *ggpubr* [@ggpubr] were both used in data visualization.
+
+```{r, echo=TRUE}
+allfinds.plot2 <-
+ggplot()+
+geom_area(UMH_allfinds, mapping = aes(x=Spit, y=Finds, fill=Material, alpha=Period), position = "fill")+
+labs(x="Spit",y="Proportion of all finds", fill="Material")+
+theme_pubclean()+
+scale_fill_manual(values = gerrit, labels = c("Nonquartz.big" = "Other (technological)", "Quartz.big" = "Quartz (technological)", "Quartz.small" = "Quartz (small)", "Nonquartz.small" = "Other (small)"))+
+scale_alpha_manual(values = c("LSA"=1, "Transition"=.6, "MSA"=1), guide = "none")+
+annotate("label", x=40.5, y=.05, label="LSA", size=4)+
+annotate("label", x = 48.5, y = .05, label="MSA", size = 4)+
+theme(legend.position = "right")
+allfinds.plot2
+```
+
+## Data
+
+Data sets used in this document are printed below.
+
+**MSA_spits**
+
+```{r MSA, echo=FALSE}
+paged_table(MSA_spits)
+```
+
+**LSA_spits**
+
+```{r LSA, echo=FALSE}
+paged_table(LSA_spits)
+```
+
+**UMH_sieves**
+
+```{r sieves, echo=FALSE}
+paged_table(UMH_sieves)
+```
+
+**UMH_allfinds**
+
+```{r data, echo=FALSE}
+paged_table(UMH_allfinds)
+```
